@@ -30,4 +30,4 @@ class KanjiResponse(BaseModel):
     kunyomi: List[str]
     jlpt: str
     stroke_count: int
-    examples: list
+    examples: List[dict]

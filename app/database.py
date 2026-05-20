@@ -11,7 +11,10 @@ def build_engine(database_url: str):
     params = parse_qs(parsed.query, keep_blank_values=True)
 
     connect_args = {}
-    if params.pop("ssl", None) or params.pop("sslmode", None):
+    needs_ssl = bool(params.pop("ssl", None) or params.pop("sslmode", None))
+    params.pop("channel_binding", None)
+
+    if needs_ssl:
         ctx = ssl.create_default_context()
         connect_args["ssl"] = ctx
 

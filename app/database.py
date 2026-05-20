@@ -1,10 +1,26 @@
+import ssl
 from collections.abc import AsyncGenerator
+from urllib.parse import urlparse, urlencode, urlunparse, parse_qs
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from app.core.config import settings
 
 
-engine = create_async_engine(settings.database_url, echo=False)
+def build_engine(database_url: str):
+    parsed = urlparse(database_url)
+    params = parse_qs(parsed.query, keep_blank_values=True)
+
+    connect_args = {}
+    if params.pop("ssl", None) or params.pop("sslmode", None):
+        ctx = ssl.create_default_context()
+        connect_args["ssl"] = ctx
+
+    clean_query = urlencode({k: v[0] for k, v in params.items()})
+    clean_url = urlunparse(parsed._replace(query=clean_query))
+    return create_async_engine(clean_url, connect_args=connect_args, echo=False)
+
+
+engine = build_engine(settings.database_url)
 AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 

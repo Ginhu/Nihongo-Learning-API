@@ -1,10 +1,11 @@
 import asyncio
 import json
 from sqlalchemy import text
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import async_sessionmaker
 from app.core.config import settings
+from app.database import build_engine
 
-engine = create_async_engine(settings.database_url)
+engine = build_engine(settings.database_url)
 SessionLocal = async_sessionmaker(engine, expire_on_commit=False)
 
 HIRAGANA = [

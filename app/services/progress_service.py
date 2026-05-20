@@ -1,3 +1,4 @@
+import uuid
 from datetime import date, timedelta
 from math import floor
 from typing import Optional
@@ -29,7 +30,7 @@ def calculate_streak(last_played: Optional[date], today: date, current_streak: i
 
 async def apply_quiz_result(
     db: AsyncSession,
-    user_id,
+    user_id: uuid.UUID,
     mode: str,
     score: int,
     total: int,

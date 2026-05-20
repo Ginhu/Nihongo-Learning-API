@@ -2,6 +2,7 @@ import pytest
 import pytest_asyncio
 from httpx import AsyncClient, ASGITransport
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.pool import NullPool
 from sqlalchemy import text
 import os
 
@@ -10,7 +11,7 @@ TEST_DATABASE_URL = os.environ.get(
     "postgresql+asyncpg://postgres:postgres@localhost:5432/nihongo_test",
 )
 
-test_engine = create_async_engine(TEST_DATABASE_URL)
+test_engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
 TestSessionLocal = async_sessionmaker(test_engine, expire_on_commit=False)
 
 
@@ -29,10 +30,11 @@ async def create_tables():
 
 
 @pytest_asyncio.fixture(autouse=True)
-async def clean_users():
+async def clean_tables():
     yield
     async with TestSessionLocal() as session:
         await session.execute(text("TRUNCATE users RESTART IDENTITY CASCADE"))
+        await session.execute(text("TRUNCATE kana, vocabulary, kanji RESTART IDENTITY"))
         await session.commit()
 
 
@@ -46,7 +48,7 @@ async def client():
             yield session
 
     app.dependency_overrides[get_db] = override_db
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="https://test") as ac:
         yield ac
     app.dependency_overrides.pop(get_db, None)
 

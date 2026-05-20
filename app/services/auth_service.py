@@ -46,7 +46,10 @@ async def get_or_create_oauth_user(
 
     if oauth_account:
         result = await db.execute(select(User).where(User.id == oauth_account.user_id))
-        return result.scalar_one()
+        user = result.scalar_one_or_none()
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return user
 
     result = await db.execute(select(User).where(User.email == email))
     user = result.scalar_one_or_none()
@@ -65,21 +68,25 @@ async def get_or_create_oauth_user(
 
 
 async def _email_exists(db: AsyncSession, email: str) -> bool:
-    result = await db.execute(select(User).where(User.email == email))
+    result = await db.execute(select(User.id).where(User.email == email).limit(1))
     return result.scalar_one_or_none() is not None
 
 
 async def _username_exists(db: AsyncSession, username: str) -> bool:
-    result = await db.execute(select(User).where(User.username == username))
+    result = await db.execute(select(User.id).where(User.username == username).limit(1))
     return result.scalar_one_or_none() is not None
 
 
 async def _unique_username(db: AsyncSession, base: str) -> str:
-    candidate = base.replace(" ", "_").lower()[:30]
+    slug = base.replace(" ", "_").lower()[:30]
+    candidate = slug
     counter = 0
     while await _username_exists(db, candidate):
         counter += 1
-        candidate = f"{base[:27]}_{counter}"
+        if counter > 10:
+            candidate = f"{slug[:21]}_{uuid.uuid4().hex[:8]}"
+            break
+        candidate = f"{slug[:27]}_{counter}"
     return candidate
 
 

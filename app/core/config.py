@@ -7,6 +7,7 @@ class Settings(BaseSettings):
     algorithm: str = "HS256"
     access_token_expire_minutes: int = 60
     refresh_token_expire_days: int = 30
+    test_database_url: str = ""
     google_client_id: str = ""
     google_client_secret: str = ""
     github_client_id: str = ""

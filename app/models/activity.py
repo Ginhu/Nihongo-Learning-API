@@ -1,6 +1,6 @@
 import uuid
 from datetime import datetime
-from sqlalchemy import String, Boolean, Integer, ForeignKey, PrimaryKeyConstraint, text
+from sqlalchemy import String, Boolean, Integer, ForeignKey, Index, PrimaryKeyConstraint, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
 from app.database import Base
@@ -8,6 +8,7 @@ from app.database import Base
 
 class QuizHistory(Base):
     __tablename__ = "quiz_history"
+    __table_args__ = (Index("ix_quiz_history_user_id", "user_id"),)
 
     id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True), primary_key=True, server_default=text("gen_random_uuid()")

@@ -6,6 +6,7 @@ from app.database import Base
 
 class Kana(Base):
     __tablename__ = "kana"
+    __table_args__ = (UniqueConstraint("kana", "type"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     kana: Mapped[str] = mapped_column(String, nullable=False)
@@ -39,4 +40,4 @@ class Kanji(Base):
     kunyomi: Mapped[list[str]] = mapped_column(ARRAY(Text), nullable=False)
     jlpt: Mapped[str] = mapped_column(String, nullable=False)
     stroke_count: Mapped[int] = mapped_column(Integer, nullable=False)
-    examples: Mapped[list] = mapped_column(JSONB, nullable=False)
+    examples: Mapped[list[dict]] = mapped_column(JSONB, nullable=False)

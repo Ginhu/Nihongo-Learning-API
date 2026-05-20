@@ -1,5 +1,5 @@
 import uuid
-from datetime import datetime, date
+from datetime import datetime, date, timezone
 from sqlalchemy import String, Boolean, Integer, Date, ForeignKey, UniqueConstraint, text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column
@@ -17,7 +17,8 @@ class User(Base):
     password_hash: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[datetime] = mapped_column(server_default=text("now()"))
     updated_at: Mapped[datetime] = mapped_column(
-        server_default=text("now()"), onupdate=datetime.utcnow
+        server_default=text("now()"),
+        onupdate=lambda: datetime.now(timezone.utc),
     )
 
 

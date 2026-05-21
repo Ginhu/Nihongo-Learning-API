@@ -6,14 +6,19 @@ from app.routers import auth, content, settings as settings_router, progress, fl
 
 app = FastAPI(title="Nihongo Master API")
 
+@app.on_event("startup")
+async def startup():
+    import sys
+    print(f"[CORS] Allowed origins: {settings.get_cors_origins()}", file=sys.stderr, flush=True)
+
+app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[settings.frontend_url, "https://ginhu.github.io"],
+    allow_origins=settings.get_cors_origins(),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(SessionMiddleware, secret_key=settings.secret_key)
 
 app.include_router(auth.router)
 app.include_router(content.router)

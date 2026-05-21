@@ -13,8 +13,15 @@ class Settings(BaseSettings):
     github_client_id: str = ""
     github_client_secret: str = ""
     frontend_url: str = "https://ginhu.github.io/Nihongo-Learning"
+    cors_origins: str = ""
 
     model_config = {"env_file": ".env"}
+
+    def get_cors_origins(self) -> list[str]:
+        base = [self.frontend_url, "https://ginhu.github.io"]
+        if self.cors_origins:
+            base += [o.strip() for o in self.cors_origins.split(",") if o.strip()]
+        return base
 
 
 settings = Settings()

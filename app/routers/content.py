@@ -29,9 +29,9 @@ async def get_vocabulary(
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Vocabulary)
-    if jlpt:
+    if jlpt and jlpt != "all":
         stmt = stmt.where(Vocabulary.jlpt == jlpt)
-    if category:
+    if category and category != "all":
         stmt = stmt.where(Vocabulary.category == category)
     result = await db.execute(stmt)
     items = result.scalars().all()
@@ -56,7 +56,7 @@ async def get_kanji(
     db: AsyncSession = Depends(get_db),
 ):
     stmt = select(Kanji)
-    if jlpt:
+    if jlpt and jlpt != "all":
         stmt = stmt.where(Kanji.jlpt == jlpt)
     result = await db.execute(stmt)
     items = result.scalars().all()
